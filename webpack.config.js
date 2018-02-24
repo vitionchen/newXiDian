@@ -6,40 +6,54 @@ var autoprefixer = require('autoprefixer');
 var CleanWebpackPlugin = require('clean-webpack-plugin');
 var glob = require('glob');
 var files = glob.sync('./initProject/img/*.png');
-var entryJson = {
-    main:["babel-polyfill",__dirname + "/initProject/index.js"]
-}
-console.log(files);
-for(var i = 0 ; i < files.length;i++){
-    entryJson[files[i].substring(files[i].lastIndexOf('/'),files[i].lastIndexOf('.'))]=files[i]
-}
+var HtmlWebpackPlugin = require('html-webpack-plugin')
+// var entryJson = {
+//     main:["babel-polyfill",__dirname + "/initProject/index.js"]
+// }
+// console.log(files);
+// for(var i = 0 ; i < files.length;i++){
+//     entryJson[files[i].substring(files[i].lastIndexOf('/'),files[i].lastIndexOf('.'))]=files[i]
+// }
 
 console.log(process.env.XD_ENV);
+var myEnv = process.env.XD_ENV;
+var outPutJson;
+if(myEnv=='production'){
+    outPutJson={
+        publicPath:"./",
+        path: __dirname+"/projectOutput/",
+        filename: "[name].js"
+    }
+}else{
+    outPutJson={
+        path: __dirname+"/initProject/",
+        filename: "[name].js"
+    }
+}
 module.exports= {
-    // entry: ["babel-polyfill",__dirname + "/initProject/index.js"],
-    // // 输出文件路径
-    // output: {
-    //     path: __dirname+"/projectOutputNew",
-    //     publicPath: __dirname+"/projectOutput/images",
-    //     filename: "[name].js"
-    // },
-    // 输入文件路径
     entry: [
         "babel-polyfill",
         __dirname + "/initProject/index.js"
     ],
-    output: {
-        path: __dirname+"/projectOutput",
-        filename: "[name].js"
-    },
+    // 输出文件路径
+    output: outPutJson,
+    // 输入文件路径
+    // entry: [
+    //     "babel-polyfill",
+    //     __dirname + "/initProject/index.js"
+    // ],
+    // output: {
+    //     path: __dirname+"/projectOutput",
+    //     filename: "[name].js"
+    // },
     //存放本地服务器,自动刷新
     devServer:{
         disableHostCheck: true,
-        contentBase:'./projectOutput',
+        contentBase:'./initProject/',
         historyApiFallback:false,
         inline:true,
         hot:true,
-        port:8759,
+        port:8760,
         host:'0.0.0.0'
     },
     // 模块，处理器
@@ -78,8 +92,8 @@ module.exports= {
           },
           {
               test:/\.(jpg|png|gif)$/,
-              use:['url-loader'],
-            //   use:['url-loader?limit=1111&name=images/[name].[ext]'],
+            //   use:['url-loader'],
+              use:['url-loader?limit=1111&name=images/[name].[ext]'],
               exclude: /node_modules/
           }
       ]
@@ -111,12 +125,15 @@ module.exports= {
             except:['exports','require'],
         }),
         new CleanWebpackPlugin(
-            ['*.js',],　 //匹配删除的文件
+            ['*.js','*.html'],　 //匹配删除的文件
             {
                 root: __dirname+"/projectOutput",       　　　　　　　　　　//根目录
                 verbose:  true,        　　　　　　　　　　//开启在控制台输出信息
                 dry:      false        　　　　　　　　　　//启用删除文件
             }
-        )
+        ),
+        new HtmlWebpackPlugin({
+            template: __dirname + "/initProject/index.html"
+       })
     ]
 };
